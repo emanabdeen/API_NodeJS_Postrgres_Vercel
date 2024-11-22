@@ -1,0 +1,17 @@
+{
+  "name": "api_nodejs_express",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Eman Abdeen",
+  "license": "ISC",
+  "description": "This project is a web API Node.js using Express",
+  "dependencies": {
+    "express": "^4.21.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}

@@ -183,16 +183,16 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
   });
 
   app.get('/',(req,res)=>{
-    res.send('eman abdeen');
+    res.send('Assignment 3 By Eman Abdeen');
   });
 
-
-// Export the app for Vercel
-//module.exports = app;
 
 // Start the server
 app.listen(process.env.PG_PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PG_PORT}`);
 });
+
+// Export the app for Vercel
+module.exports = app;
 
 

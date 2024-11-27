@@ -20,6 +20,9 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 - The API is deployed on Vercel and is Live. The Base address:
  `https://api-node-js-postrgres-vercel.vercel.app/api/Greetings`  or  `https://api-node-js-postrgres-vercel-git-master-eabdeens-projects.vercel.app/api/Greetings`.
 
+- For using the console application with the deployed API  make sure to set the Base address as follow: 
+```csharp
+ client.BaseAddress = new Uri("https://api-node-js-postrgres-vercel.vercel.app/api/Greetings/"); 
 
 ## API Endpoint
 

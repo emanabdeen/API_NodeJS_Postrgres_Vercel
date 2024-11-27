@@ -1,7 +1,7 @@
 
 # WAPI_NodeJS_Express
 
-This project is a web API Node.js using Express
+This project is a web API Node.js using Express. the project uses PostgreSQL. Neon is used as cloud-host PostgreSQL provider.
 
 ## Getting Started
 
@@ -17,13 +17,14 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 - Retrieve a list of available times of day.
 - Retrieve a list of supported languages.
 
-- The API Runns Locally will be accessible at `http://localhost:3000/`.
+- The API is deployed on Vercel and is Live. The Base address:
+ `https://api-node-js-postrgres-vercel.vercel.app/api/Greetings`  or  `https://api-node-js-postrgres-vercel-git-master-eabdeens-projects.vercel.app/api/Greetings`.
+
 
 ## API Endpoint
 
-### POST **/api/GreetUser**
-
-- **URL**: `http://localhost:5432/api/GreetUser`
+### POST **/GreetUser**
+- **URL**: `https://api-node-js-postrgres-vercel-git-master-eabdeens-projects.vercel.app/api/Greetings/GreetUser`
 - **Description**: Returns a greeting message based on the time of day, language and Tone.
 - **Request Body**:
 
@@ -43,9 +44,8 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 }
 ```
 
-### **GetAllTimesOfDay**
-
-- **URL**: `GET /api/Greetings/GetAllTimesOfDay`
+### GET **/GetAllTimesOfDay**
+- **URL**: `https://api-node-js-postrgres-vercel-git-master-eabdeens-projects.vercel.app/api/Greetings/GetAllTimesOfDay`
 - **Description**: Returns all Times of day
 - **response Body**:
 
@@ -57,9 +57,9 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 ]
 ```
 
-### **GetSupportedLanguages**
+### GET **/GetSupportedLanguages**
 
-- **URL**: `GET /api/Greetings/GetSupportedLanguages`
+- **URL**: `https://api-node-js-postrgres-vercel-git-master-eabdeens-projects.vercel.app/api/Greetings/GetSupportedLanguages`
 - **Description**: Returns all the suppoted languages
 - **response Body**:
 

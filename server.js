@@ -182,6 +182,10 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
     }
   });
 
+  app.get('/',(req,res)=>{
+    res.send('eman abdeen');
+  });
+
 
 // Export the app for Vercel
 module.exports = app;

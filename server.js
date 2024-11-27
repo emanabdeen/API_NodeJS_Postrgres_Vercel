@@ -1,85 +1,96 @@
-//Student Name: Eman Abdeen
-//ID:8783804
-
+require('dotenv').config();
 const express = require('express');
-const sqlite = require('sqlite');
-const sqlite3 = require('sqlite3');
-const path = require('path'); // give us access to the absolute path
-
+const postgres = require('postgres');
 const GreetingRequest= require('./Models/GreetingRequest');
 const GreetingResponse= require('./Models/GreetingResponse');
 
+
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PG_PORT } = process.env;
+const sql = postgres({
+  host: PGHOST,
+  database: PGDATABASE,
+  username: PGUSER,
+  password: PGPASSWORD,
+  port: PG_PORT,
+  ssl: 'require',
+});
+
 const app = express();
-const PORT = 3000;
 
 // for parsing JSON
 app.use(express.json());
 
-// To initialize SQLite database
-let db;
+//-----------------------------------
+async function getPgVersion() {
+  const result = await sql`select version()`;
+  console.log(result[0]);
+}
+getPgVersion();
+//---------------------------------------------
+
+// Initialize PostgreSQL database
 (async () => {
-  db = await sqlite.open({
-    filename: './data/database.db',
-    driver: sqlite3.Database
-  });
+  try {
+    // Create the 'Greetings' table if it doesn't exist
+    await sql`
+      CREATE TABLE IF NOT EXISTS Greetings (
+        id SERIAL PRIMARY KEY,
+        TimeOfDay TEXT NOT NULL,
+        Language TEXT NOT NULL,
+        GreetingMessage TEXT NOT NULL,
+        Tone TEXT NOT NULL
+      )
+    `;
 
-  // Create a 'Greetings' table if it doesn't exist
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS Greetings (
-        id INTEGER PRIMARY KEY,
-        TimeOfDay TEXT,
-        Language TEXT,
-        GreetingMessage TEXT,
-        Tone TEXT
-    )
-  `);
+    // Seed data
+    const seedData = [
+      ['Morning', 'English', 'Good Morning!', 'Formal'],
+      ['Morning', 'English', 'Hey, Good Morning!', 'Casual'],
+      ['Afternoon', 'English', 'Good Afternoon!', 'Formal'],
+      ['Afternoon', 'English', 'Hey, Good Afternoon!', 'Casual'],
+      ['Evening', 'English', 'Good Evening!', 'Formal'],
+      ['Evening', 'English', 'Hey, Good Evening!', 'Casual'],
+      ['Morning', 'Italian', 'Buongiorno!', 'Formal'],
+      ['Morning', 'Italian', 'Ehi, Buongiorno!', 'Casual'],
+      ['Afternoon', 'Italian', 'Buon pomeriggio!', 'Formal'],
+      ['Afternoon', 'Italian', 'Ehi, Buon pomeriggio!', 'Casual'],
+      ['Evening', 'Italian', 'Buonasera!', 'Formal'],
+      ['Evening', 'Italian', 'Ehi,  Buonasera!', 'Casual'],
+      ['Morning', 'Spanish', 'Buenos días!', 'Formal'],
+      ['Morning', 'Spanish', 'Hola, Buenos días!', 'Casual'],
+      ['Afternoon', 'Spanish', 'Buenas tardes!', 'Formal'],
+      ['Afternoon', 'Spanish', 'Hola, Buenas tardes!', 'Casual'],
+      ['Evening', 'Spanish', 'Buenas noches!', 'Formal'],
+      ['Evening', 'Spanish', 'Hola, Buenas noches!', 'Casual'],
+    ];
 
-  // Seed the database
-  const seedData = [
-    ['Morning', 'English', 'Good Morning!', 'Formal'],
-    ['Morning', 'English', 'Hey, Good Morning!', 'Casual'],
-    ['Afternoon', 'English', 'Good Afternoon!', 'Formal'],
-    ['Afternoon', 'English', 'Hey, Good Afternoon!', 'Casual'],
-    ['Evening', 'English', 'Good Evening!', 'Formal'],
-    ['Evening', 'English', 'Hey, Good Evening!', 'Casual'],
+    for (const [TimeOfDay, Language, GreetingMessage, Tone] of seedData) {
+      const exists = await sql`
+        SELECT 1 
+        FROM Greetings 
+        WHERE TimeOfDay = ${TimeOfDay} AND Language = ${Language} AND Tone = ${Tone}
+      `;
 
-    ['Morning', 'Italian', 'Buongiorno!', 'Formal'],
-    ['Morning', 'Italian', 'Ehi, Buongiorno!', 'Casual'],
-    ['Afternoon', 'Italian', 'Buon pomeriggio!', 'Formal'],
-    ['Afternoon', 'Italian', 'Ehi, Buon pomeriggio!', 'Casual'],
-    ['Evening', 'Italian', 'Buonasera!', 'Formal'],
-    ['Evening', 'Italian', 'Ehi,  Buonasera!', 'Casual'],
-
-    ['Morning', 'Spanish', 'Buenos días!', 'Formal'],
-    ['Morning', 'Spanish', 'Hola, Buenos días!', 'Casual'],
-    ['Afternoon', 'Spanish', 'Buenas tardes!', 'Formal'],
-    ['Afternoon', 'Spanish', 'Hola, Buenas tardes!', 'Casual'],
-    ['Evening', 'Spanish', 'Buenas noches!', 'Formal'],
-    ['Evening', 'Spanish', 'Hola, Buenas noches!', 'Casual'],
-  ];
-
-  for (const [TimeOfDay, Language, GreetingMessage, Tone] of seedData) {
-    const existingEntry = await db.get(
-      `SELECT 1 FROM Greetings WHERE TimeOfDay = ? AND Language = ? AND Tone = ?`,
-      [TimeOfDay, Language, Tone]
-    );
-
-    // if the record doesn't exist seed it
-    if (!existingEntry) {
-      await db.run(
-        `INSERT INTO Greetings (TimeOfDay, Language, GreetingMessage, Tone) VALUES (?, ?, ?, ?)`,
-        [TimeOfDay, Language, GreetingMessage, Tone]
-      );
+      // if the record doesn't exist seed it
+      if (exists.length === 0) {
+        await sql`
+          INSERT INTO Greetings (TimeOfDay, Language, GreetingMessage, Tone)
+          VALUES (${TimeOfDay}, ${Language}, ${GreetingMessage}, ${Tone})
+        `;
+      }
     }
-  }
 
-  console.log('Database seeding completed.');
+    console.log('Database initialized and seeded.');
+  } catch (error) {
+    console.error('Error initializing database:', error);
+  }
 })();
 
 
-// Greet Endpoint
+// GreetUser Endpoint
 app.post('/api/Greetings/GreetUser', async (req, res) => {
-   // make the default Tone = Formal if it is empty 
+   
+  // make the default Tone = Formal if it is empty 
   if (req.body.Tone.toLowerCase() === 'formal' || !req.body.Tone) {
     req.body.Tone="Formal";
   }
@@ -94,16 +105,19 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
       return res.status(400).json({ error: 'TimeOfDay, Language, and Tone are required' });
     }
   
-    try {
-      const result = await db.get('SELECT GreetingMessage FROM Greetings WHERE TimeOfDay = ? AND Language = ? AND Tone = ?', [TimeOfDay, Language, Tone]);
+    try {     
+      const result = await sql`
+      SELECT GreetingMessage
+      FROM Greetings
+      WHERE TimeOfDay = ${TimeOfDay} AND Language = ${Language} AND Tone = ${Tone}
+      `;
       
-      const greetingResponse = new GreetingResponse(result.GreetingMessage);
-
       if (!result) {
         return res.status(404).json({ error: 'Greeting not found' });
       }
       else{
-        res.json({greetingMessage: greetingResponse.GreetingMessage});  //res.json({greetingResponse.greetingMessage}); is incorrect because it results in an anonymous object key. So we have to use key for the JSON object 'greetingMessage:'
+        const greetingResponse = new GreetingResponse(result[0].greetingmessage); // Note that result=[{"greetingmessage": "Good Morning!"}]
+        res.json({ greetingMessage: greetingResponse.GreetingMessage });  //results should have object key. So we have to use key for the JSON object 'greetingMessage:'
       }
       
     } catch (error) {
@@ -118,14 +132,19 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
   app.get('/api/Greetings/GetAllTimesOfDay', async (req, res) => {
     try {
 
-       //The result from db.all will be an array of objects. Each object will have a timeOfDay property. 
-      const result = await db.all('SELECT DISTINCT TimeOfDay FROM Greetings');
+      //The result from db.all will be an array of objects. Each object will have a timeOfDay property. 
+      const result = await sql`
+      SELECT DISTINCT TimeOfDay
+      FROM Greetings
+      `;
+      
+      
       if (!result) {
         return res.status(404).json({ error: 'TimeOfDay not found' });
       }
       else{
-        // extract only the 'timeOfDay' values from each object and put them into a new array.
-        const timesOfDay = result.map(row => row.TimeOfDay);
+        // extract only the 'timeOfDay' values from each object and put them into a new array. (note the Case Sensitivity 'timeofday' not 'TimeOfDay')
+        const timesOfDay = result.map(row => row.timeofday);
         
         //wrap the timesOfDay array in an object before sending it as the JSON response 
         res.status(200).json(timesOfDay);
@@ -141,14 +160,18 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
   app.get('/api/Greetings/GetSupportedLanguages', async (req, res) => {
     try {
 
-       //The result from db.all will be an array of objects. Each object will have a timeOfDay property. 
-      const result = await db.all('SELECT DISTINCT Language FROM Greetings');
+      //The result from db.all will be an array of objects. Each object will have a timeOfDay property. 
+      const result = await sql`
+      SELECT DISTINCT Language
+      FROM Greetings
+      `;
+      
       if (!result) {
         return res.status(404).json({ error: 'language not found' });
       }
       else{
-        // extract only the 'language' values from each object and put them into a new array.
-        const language = result.map(row => row.Language);
+        // extract only the 'language' values from each object and put them into a new array. (note the Case Sensitivity 'language' not 'Language')
+        const language = result.map(row => row.language);
         
         //wrap the timesOfDay array in an object before sending it as the JSON response 
         res.status(200).json(language);
@@ -161,6 +184,7 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
 
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(process.env.PG_PORT, () => {
+    console.log(`Server running on http://localhost:${process.env.PG_PORT}`);
   });
+

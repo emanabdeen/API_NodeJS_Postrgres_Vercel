@@ -23,7 +23,7 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 
 ### POST **/api/GreetUser**
 
-- **URL**: `http://localhost:3000/api/GreetUser`
+- **URL**: `http://localhost:5432/api/GreetUser`
 - **Description**: Returns a greeting message based on the time of day, language and Tone.
 - **Request Body**:
 
@@ -76,4 +76,4 @@ The **Greeting API** is a simple Node.js API that serves greetings based on the 
 **This assignment is designed by**
 **student name**: Eman Abdeen  
 **Student id**: 8783804
-**GitHub repository**: `https://github.com/emanabdeen/API_NodeJS_Express`
+**GitHub repository**: `https://github.com/emanabdeen/API_NodeJS_Postrgres_Vercel`

@@ -10,7 +10,13 @@
   "license": "ISC",
   "description": "This project is a web API Node.js using Express",
   "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
     "express": "^4.21.1",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "dotenv": "^16.4.5",
+    "postgres": "^3.4.5",
+    "sequelize": "^6.37.5",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   }

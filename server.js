@@ -183,8 +183,6 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
   });
 
 
-// Start the server
-app.listen(process.env.PG_PORT, () => {
-    console.log(`Server running on http://localhost:${process.env.PG_PORT}`);
-  });
+// Export the app for Vercel
+module.exports = app;
 

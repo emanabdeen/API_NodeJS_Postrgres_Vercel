@@ -182,7 +182,7 @@ app.post('/api/Greetings/GreetUser', async (req, res) => {
     }
   });
 
-  app.get('/api/Greetings',(req,res)=>{
+  app.get('/',(req,res)=>{
     res.send('Assignment 3 By Eman Abdeen');
   });
 
